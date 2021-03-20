@@ -1,0 +1,19 @@
+Offre{
+    idOffre,
+    appel : [
+        {
+            debut,
+            fin,
+            cout/s meme sop
+            cout/s diff op
+            cout/s 
+        }
+    ]
+}
+
+Token{
+    idClient,
+    token,
+    status
+}
+
