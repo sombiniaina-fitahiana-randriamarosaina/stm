@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="STM" id="Project_1eca" database="PostgreSQL" >
+	<schema name="stm" >
+		<table name="client" >
+			<column name="idclient" type="varchar" jt="12" mandatory="y" />
+			<column name="nomclient" prior="nom" type="varchar" jt="12" mandatory="y" />
+			<column name="cin" type="char" length="12" jt="1" mandatory="y" />
+			<column name="numero" type="char" length="13" jt="1" mandatory="y" />
+			<column name="motdepasse" type="char" length="40" jt="1" mandatory="y" />
+			<index name="pk_client_idclient" unique="PRIMARY_KEY" >
+				<column name="idclient" />
+			</index>
+		</table>
+		<table name="data" prior="achatoffre" >
+			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
+			<column name="idclient" type="varchar" jt="12" mandatory="y" />
+			<column name="idforfait" type="varchar" jt="12" mandatory="y" />
+			<column name="data" prior="montant" type="decimal" length="14" decimal="2" jt="3" mandatory="y" />
+			<column name="dateexpiration" type="timestamp" jt="93" mandatory="y" />
+			<fk name="fk_achatoffre_offre" to_schema="stm" to_table="offre" >
+				<fk_column name="idoffre" pk="idoffre" />
+			</fk>
+			<fk name="fk_achatoffre_client" to_schema="stm" to_table="client" >
+				<fk_column name="idclient" pk="idclient" />
+			</fk>
+			<fk name="fk_achatoffre_forfait" to_schema="stm" to_table="forfait" >
+				<fk_column name="idforfait" pk="idforfait" />
+			</fk>
+		</table>
+		<table name="forfait" >
+			<column name="idforfait" type="varchar" jt="12" mandatory="y" />
+			<column name="nom" type="varchar" jt="12" mandatory="y" />
+			<column name="unite" type="varchar" jt="12" mandatory="y" />
+			<index name="pk_forfait_idforfait" unique="PRIMARY_KEY" >
+				<column name="idforfait" />
+			</index>
+		</table>
+		<table name="horaire" >
+			<column name="idoffre" type="varchar" jt="12" />
+			<column name="debut" type="time" jt="92" mandatory="y" />
+			<column name="fin" type="time" jt="92" mandatory="y" />
+			<index name="unq_horaire_idoffre" unique="UNIQUE_KEY" >
+				<column name="idoffre" />
+			</index>
+			<fk name="fk_horaire_horaire" to_schema="stm" to_table="offre" >
+				<fk_column name="idoffre" pk="idoffre" />
+			</fk>
+		</table>
+		<table name="offre" >
+			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
+			<column name="nomoffre" type="varchar" jt="12" mandatory="y" />
+			<column name="description" type="text" jt="12" mandatory="y" />
+			<index name="pk_offre_idoffre" unique="PRIMARY_KEY" >
+				<column name="idoffre" />
+			</index>
+		</table>
+		<table name="offreforfait" >
+			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
+			<column name="idforfait" type="varchar" jt="12" mandatory="y" />
+			<fk name="fk_offreforfait_offre" to_schema="stm" to_table="offre" >
+				<fk_column name="idoffre" pk="idoffre" />
+			</fk>
+			<fk name="fk_offreforfait_forfait" to_schema="stm" to_table="forfait" >
+				<fk_column name="idforfait" pk="idforfait" />
+			</fk>
+		</table>
+		<table name="prixoffre" >
+			<comment><![CDATA[postgresql]]></comment>
+			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
+			<column name="idforfait" type="varchar" jt="12" mandatory="y" />
+			<column name="prix" prior="cout" type="integer" jt="4" mandatory="y" />
+			<column name="validiter" type="integer" jt="4" mandatory="y" />
+			<column name="cout" type="integer[]" jt="2003" mandatory="y" />
+			<fk name="fk_prixoffre_offre" to_schema="stm" to_table="offre" >
+				<fk_column name="idoffre" pk="idoffre" />
+			</fk>
+			<fk name="fk_prixoffre_forfait" to_schema="stm" to_table="forfait" >
+				<fk_column name="idforfait" pk="idforfait" />
+			</fk>
+		</table>
+		<table name="tbl" />
+		<table name="transaction" >
+			<column name="idtransaction" type="varchar" jt="12" mandatory="y" />
+			<column name="idclient" type="varchar" jt="12" mandatory="y" />
+			<column name="montant" type="decimal" length="14" decimal="2" jt="3" mandatory="y" />
+			<column name="datetransaction" type="timestamp" jt="93" mandatory="y" />
+			<column name="etat" type="char" length="1" jt="1" mandatory="y" >
+				<comment><![CDATA[N : non-valider
+V : valider
+R : Refuser]]></comment>
+			</column>
+			<index name="pk_tbl_idtransaction" unique="PRIMARY_KEY" >
+				<column name="idtransaction" />
+			</index>
+			<fk name="fk_tbl_client" to_schema="stm" to_table="client" >
+				<fk_column name="idclient" pk="idclient" />
+			</fk>
+		</table>
+	</schema>
+	<layout name="postgresql" id="Layout_26c4" show_relation="columns" >
+		<entity schema="stm" name="client" color="C1D8EE" x="240" y="48" />
+		<entity schema="stm" name="data" color="C1D8EE" x="496" y="192" />
+		<entity schema="stm" name="forfait" color="C1D8EE" x="256" y="352" />
+		<entity schema="stm" name="horaire" color="3986C1" x="816" y="160" />
+		<entity schema="stm" name="offre" color="C1D8EE" x="752" y="336" />
+		<entity schema="stm" name="prixoffre" color="C1D8EE" x="512" y="448" />
+		<entity schema="stm" name="transaction" color="C1D8EE" x="48" y="208" />
+	</layout>
+</project>

@@ -1,19 +1,19 @@
-Offre{
-    idOffre,
-    appel : [
-        {
-            debut,
-            fin,
-            cout/s meme sop
-            cout/s diff op
-            cout/s 
-        }
-    ]
-}
+-- creation base de donnee
+use stm;
 
-Token{
-    idClient,
-    token,
-    status
-}
+-- creation user
+db.createUser({
+   user : "admin_stm",
+   pwd : "123456",
+   roles : ["readWrite", "dbAdmin"]
+})
 
+-- creation collection
+db.createCollection("Admin");
+db.createCollection("AchatOffre");
+
+
+
+-- insertion donnee
+db.Admin.insert([{"pseudo" : "admin", motDePasse : "123456"}]);
+db.AchatOffre.insert([{"idClient" : "CLT1", "idOffre" : "OFR1", dateAchat : new Timestamp()}])
