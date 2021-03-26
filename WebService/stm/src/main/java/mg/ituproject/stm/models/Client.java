@@ -72,9 +72,20 @@ public class Client {
 	}
 
 	public void inscription (Connection connection) throws ControlException, ValidateException, SQLException{
-		List<Client> lc = new ArrayList<>();
-		lc.add(this);
-		DatabaseHelper.insert(connection, lc, Database.POSTGRESQL);
+		try {
+			connection.setAutoCommit(false);
+			this.control();
+		}
+		catch(ValidateException e) {
+			try {
+				List<Client> lc = new ArrayList<>();
+				lc.add(this);
+				DatabaseHelper.insert(connection, lc, Database.POSTGRESQL);
+			}
+			
+			catch(SQLException ex) {
+				throw new ControlException(ex.getMessage(),"erreur de connection");
+			}
 		throw new ValidateException("Inscription Reussie", null);
 	}
 	
@@ -108,4 +119,100 @@ public class Client {
 			e.printStackTrace();
 		}
 	}
+	public void Message(Connection connection,MongoHelper mongoHelper,Message message) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
+		ArrayList<Data> listeData=message.getAllData(connection);
+		int i=0;
+		try{
+			if(listeData.size()==0) {
+				throw new ControlException("votre offre sms est epuisee","");
+			}
+			message.control(connection, listeData.get(i));
+		}
+		catch(ControlException e) {
+			throw new ControlException("Message  non envoyee ", e.getMessage());	
+		}
+		catch(ValidateException e) {
+			
+				message.insert(mongoHelper);
+				listeData.get(i).UpdateData(connection,message.calculCout(listeData.get(i)));
+				throw new ValidateException("appel effectue", null);
+			}	
+	}
+	public void connecter(Connection connection,MongoHelper mongoHelper,Connexion connexion) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
+		ArrayList<Data> listeData= connexion.getAllData(connection);
+		int i=0;
+		try{
+			if(listeData.size()==0) {
+				throw new ControlException("votre forfait internet est epuisee","");
+			}
+			connexion.control(connection, listeData.get(i));
+		}
+		catch(ControlException e) {
+			if(e.getMessage().equals("volume invalide")) {
+				throw new ControlException("Connexion non effectuee ", e.getMessage());
+			}
+			else {
+				connexion.insert(connection);
+				listeData.get(i).UpdateData(connection,connexion.calculCout(listeData.get(i)));
+				throw new ValidateException("connexion effectuee...", null);
+			}
+		}
+		catch(ValidateException e) {
+			if(e.getMessage().equals("Votre offre est epuisee")) {	
+				connexion.insert(connection);
+				listeData.get(i).UpdateData(connection,connexion.calculCout(listeData.get(i)));
+				i++;
+				if(i<listeData.size()){
+					connexion.setVolume(((Double)e.getData()).intValue());
+					this.connecter(connection, connexion);
+				}
+				else {
+					return;
+				}
+			}
+			else {
+				connexion.insert(connection);
+				listeData.get(i).UpdateData(connection,connexion.calculCout(listeData.get(i)));
+				throw new ValidateException("appel effectue", null);
+			}
+		}
+	}
+	public void appeller(Connection connection, MongoHelper mongoHelper,Appel appel) throws InstantiationException, IllegalAccessException, SQLException, ControlException,ValidateException, ClassNotFoundException{
+		ArrayList<Data> listeData=appel.getAllData(connection);
+		int i=0;
+		try{
+			if(listeData.size()==0) {
+				throw new ControlException("votre credit est insufisant","");
+			}
+			appel.control(connection, listeData.get(i));
+		}
+		catch(ControlException e) {
+		
+				throw new ControlException("appell non effectuee ", e.getMessage());	
+		}
+		catch(ValidateException e) {
+			if(e.getMessage().equals("Votre offre est epuisee")) {	
+				//appel.insert(mongoHelper);
+				listeData.get(i).UpdateData(connection,appel.calculCout(listeData.get(i)));
+				i++;
+				if(i<listeData.size()){
+					appel.setDuree(((Double)e.getData()).intValue());
+					this.appeller(connection, appel);
+				}
+				else {
+					throw new ControlException("Votre offre est epuisee","");
+				}
+			}
+			else {
+				appel.insert(connection);
+				listeData.get(i).UpdateData(connection,appel.calculCout(listeData.get(i)));
+				throw new ValidateException("appel effectue", null);
+			}
+		}
+	}
+	
+	
+	
+	
+	
 }
