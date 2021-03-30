@@ -1,36 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="STM" id="Project_1eca" database="PostgreSQL" >
 	<schema name="stm" >
-		<table name="achatoffre" >
-			<column name="idclient" type="varchar" jt="12" mandatory="y" />
-			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
-			<column name="dateachat" type="timestamp" jt="93" mandatory="y" />
-			<column name="status" type="boolean" length="1" jt="-7" mandatory="y" />
-			<fk name="fk_achatoffre_offre_0" to_schema="stm" to_table="offre" >
-				<fk_column name="idoffre" pk="idoffre" />
-			</fk>
-			<fk name="fk_achatoffre_client" to_schema="stm" to_table="client" >
-				<fk_column name="idclient" pk="idclient" />
-			</fk>
-		</table>
-		<table name="admin" spec="" >
-			<column name="idadmin" type="varchar" jt="12" mandatory="y" />
-			<column name="pseudo" type="varchar" jt="12" />
-			<column name="motdepasse" type="varchar" jt="12" />
-			<index name="pk_aaaa_idadmin" unique="PRIMARY_KEY" >
-				<column name="idadmin" />
-			</index>
-		</table>
-		<table name="appel" >
-			<comment><![CDATA[mongodb]]></comment>
-			<column name="idclient" type="varchar" jt="12" />
-			<column name="numero" type="char" length="13" jt="1" mandatory="y" />
-			<column name="duree" type="integer" jt="4" mandatory="y" />
-			<column name="dateappel" type="timestamp" jt="93" mandatory="y" />
-			<fk name="fk_appel_client" to_schema="stm" to_table="client" >
-				<fk_column name="idclient" pk="idclient" />
-			</fk>
-		</table>
 		<table name="client" >
 			<column name="idclient" type="varchar" jt="12" mandatory="y" />
 			<column name="nomclient" prior="nom" type="varchar" jt="12" mandatory="y" />
@@ -57,16 +27,6 @@
 				<fk_column name="idforfait" pk="idforfait" />
 			</fk>
 		</table>
-		<table name="detailoffre" >
-			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
-			<column name="idforfait" type="varchar" jt="12" mandatory="y" />
-			<fk name="fk_detailoffre_forfait" to_schema="stm" to_table="forfait" >
-				<fk_column name="idforfait" pk="idforfait" />
-			</fk>
-			<fk name="fk_detailoffre_offre" to_schema="stm" to_table="offre" >
-				<fk_column name="idoffre" pk="idoffre" />
-			</fk>
-		</table>
 		<table name="forfait" >
 			<column name="idforfait" type="varchar" jt="12" mandatory="y" />
 			<column name="nom" type="varchar" jt="12" mandatory="y" />
@@ -75,11 +35,21 @@
 				<column name="idforfait" />
 			</index>
 		</table>
+		<table name="horaire" >
+			<column name="idoffre" type="varchar" jt="12" />
+			<column name="debut" type="time" jt="92" mandatory="y" />
+			<column name="fin" type="time" jt="92" mandatory="y" />
+			<index name="unq_horaire_idoffre" unique="UNIQUE_KEY" >
+				<column name="idoffre" />
+			</index>
+			<fk name="fk_horaire_horaire" to_schema="stm" to_table="offre" >
+				<fk_column name="idoffre" pk="idoffre" />
+			</fk>
+		</table>
 		<table name="offre" >
 			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
 			<column name="nomoffre" type="varchar" jt="12" mandatory="y" />
 			<column name="description" type="text" jt="12" mandatory="y" />
-			<column name="horaire" type="varchar[]" jt="2003" />
 			<index name="pk_offre_idoffre" unique="PRIMARY_KEY" >
 				<column name="idoffre" />
 			</index>
@@ -108,25 +78,7 @@
 				<fk_column name="idforfait" pk="idforfait" />
 			</fk>
 		</table>
-		<table name="prixoffreinternet" >
-			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
-			<column name="prix" prior="coutachat" type="integer" jt="4" mandatory="y" />
-			<column name="validite" type="integer" jt="4" mandatory="y" />
-			<column name="coutparmo" type="integer" jt="4" mandatory="y" />
-			<fk name="fk_prixoffreinternet_offre" to_schema="stm" to_table="offre" >
-				<fk_column name="idoffre" pk="idoffre" />
-			</fk>
-		</table>
-		<table name="token" >
-			<column name="idpersonne" type="varchar" jt="12" mandatory="y" />
-			<column name="token" type="varchar" length="40" jt="12" mandatory="y" />
-			<fk name="fk_token_admin" to_schema="stm" to_table="admin" >
-				<fk_column name="idpersonne" pk="idadmin" />
-			</fk>
-			<fk name="fk_token_client" to_schema="stm" to_table="client" >
-				<fk_column name="idpersonne" pk="idclient" />
-			</fk>
-		</table>
+		<table name="tbl" />
 		<table name="transaction" >
 			<column name="idtransaction" type="varchar" jt="12" mandatory="y" />
 			<column name="idclient" type="varchar" jt="12" mandatory="y" />
@@ -145,17 +97,13 @@ R : Refuser]]></comment>
 			</fk>
 		</table>
 	</schema>
-	<layout name="mongodb" id="Layout_128d" show_relation="columns" >
-		<entity schema="stm" name="appel" color="3986C1" x="272" y="48" />
-		<entity schema="stm" name="token" color="3986C1" x="48" y="48" />
-	</layout>
 	<layout name="postgresql" id="Layout_26c4" show_relation="columns" >
 		<entity schema="stm" name="client" color="C1D8EE" x="240" y="48" />
 		<entity schema="stm" name="data" color="C1D8EE" x="496" y="192" />
 		<entity schema="stm" name="forfait" color="C1D8EE" x="256" y="352" />
-		<entity schema="stm" name="offre" color="C1D8EE" x="672" y="416" />
-		<entity schema="stm" name="offreforfait" color="C1D8EE" x="480" y="416" />
-		<entity schema="stm" name="prixoffre" color="C1D8EE" x="416" y="672" />
+		<entity schema="stm" name="horaire" color="3986C1" x="816" y="160" />
+		<entity schema="stm" name="offre" color="C1D8EE" x="752" y="336" />
+		<entity schema="stm" name="prixoffre" color="C1D8EE" x="512" y="448" />
 		<entity schema="stm" name="transaction" color="C1D8EE" x="48" y="208" />
 	</layout>
 </project>

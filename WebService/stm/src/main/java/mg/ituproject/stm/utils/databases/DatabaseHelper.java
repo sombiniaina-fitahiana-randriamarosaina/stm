@@ -64,7 +64,7 @@ public class DatabaseHelper {
                 Method setters = object.getClass().getMethod("set" + Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1), field.getType());
                 setters.invoke(object, databaseValue);
             } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | ClassNotFoundException ex) {
-            	ex.printStackTrace();
+            	
             } 
         }
     }

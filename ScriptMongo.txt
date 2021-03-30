@@ -11,6 +11,8 @@ db.createUser({
 -- creation collection
 db.createCollection("Admin");
 db.createCollection("AchatOffre");
+db.createCollection("TokenAdmin");
+db.createCollection("TokenClient");
 
 
 

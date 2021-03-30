@@ -6,7 +6,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
+
 import mg.ituproject.stm.utils.databases.DatabaseHelper;
+import mg.ituproject.stm.utils.exceptions.ControlException;
 import mg.ituproject.stm.utils.exceptions.ValidateException;
 
 public class Transaction {
@@ -49,7 +52,9 @@ public class Transaction {
 		this.etat = etat;
 	}
 	
-	public static List<Transaction> findDepotsNonValider(Connection connection){
+	public static List<Transaction> findDepotsNonValider(Connection connection, MongoTemplate mongoTemplate, String token) throws ControlException{
+		if(!Token.estConnecteAdmin(mongoTemplate, token)) 
+			throw new ControlException("Token Invalide", "token");
 		List<Transaction> lc = null;
 		try {
 			String requete = String.format("SELECT * FROM DEPOTNONVALIDER");	        

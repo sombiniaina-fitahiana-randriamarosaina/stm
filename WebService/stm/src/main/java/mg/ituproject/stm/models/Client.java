@@ -8,10 +8,14 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+
+import com.mongodb.client.result.DeleteResult;
 
 import mg.ituproject.stm.utils.databases.Database;
 import mg.ituproject.stm.utils.databases.DatabaseHelper;
-import mg.ituproject.stm.utils.databases.MongoHelper;
 import mg.ituproject.stm.utils.exceptions.ControlException;
 import mg.ituproject.stm.utils.exceptions.ValidateException;
 
@@ -22,12 +26,16 @@ public class Client {
 	protected String cin;
 	protected String numero;
 	protected String motDePasse;
+	protected Token token;
 	
 	// Constructor
 	public Client() {
 	}
 	public Client(String idClient) {
 		this.setIdClient(idClient);
+	}
+	public Client(Token token) {
+		this.token = token;
 	}
 
 	// Getters
@@ -71,14 +79,13 @@ public class Client {
 		return DigestUtils.sha1Hex(motDePasse);
 	}
 
-	public void inscription (Connection connection) throws ControlException, ValidateException, SQLException{
+	public void inscription (Connection connection) throws ControlException, SQLException{
 		List<Client> lc = new ArrayList<>();
 		lc.add(this);
 		DatabaseHelper.insert(connection, lc, Database.POSTGRESQL);
-		throw new ValidateException("Inscription Reussie", null);
 	}
 	
-	public void connexion(Connection connection, MongoHelper mongoHelper) throws ControlException, ValidateException, SQLException{
+	public Token connexion(Connection connection, MongoTemplate mongoTemplate) throws ControlException, SQLException{
 		try {
 			String requete = String.format("select * from Client where nomClient='%s'", getNomClient());
             List<Client> lc = DatabaseHelper.find(connection, requete, Client.class);
@@ -87,14 +94,33 @@ public class Client {
             else if (lc.get(0).motDePasse.compareTo(this.getMotDePasse()) != 0)
             	throw new ControlException("le mot de passe est incorrecte", "moteDePasse");
             else {
-            	Token token = Token.generateToken(lc.get(0));
-//            	token.insert(mongoHelper);
-            	throw new ValidateException("Connexion Reussie", token);
+            	this.setIdClient(lc.get(0).getIdClient());
+            	Query queryToken = new Query();
+            	queryToken.addCriteria(Criteria.where("idPersonne").is(lc.get(0).getIdClient()));
+        		Token token = mongoTemplate.findOne(queryToken, Token.class, "TokenClient");
+            	if(token == null) {
+            		token = Token.generateToken(this);
+            		token.setIdPersonne(lc.get(0).getIdClient());
+            		token.insertClient(mongoTemplate);
+            	}
+            	return token;
             }
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
+			return null;
 		}
     }
+	
+	public void deconnexion(MongoTemplate mongoTemplate) throws ControlException {
+		if(!Token.estConnecteClient(mongoTemplate, this.token.getToken())) 
+			throw new ControlException("Vous n'etes pas connecter", "token");
+		
+		Query query = new Query();
+		query.addCriteria(Criteria.where("token").is(this.token.getToken()));
+		DeleteResult result = mongoTemplate.remove(query, "Token");
+		if(result.getDeletedCount() == 0)
+			throw new ControlException("token invalide", "token");
+	}
 	
 	public void getCompte(Connection connection) throws ControlException, ValidateException, SQLException{
 		try {

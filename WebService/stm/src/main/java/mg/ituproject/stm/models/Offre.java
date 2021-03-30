@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.origin.SystemEnvironmentOrigin;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import mg.ituproject.stm.utils.databases.Database;
 import mg.ituproject.stm.utils.databases.DatabaseHelper;
@@ -104,7 +105,9 @@ public class Offre{
         }
 	}
 	
-	public List<Statistiques> getStatistiqueJournalier(Connection connection) throws ControlException{
+	public List<Statistiques> getStatistiqueJournalier(Connection connection, MongoTemplate mongoTemplate, String token) throws ControlException{
+		if(!Token.estConnecteAdmin(mongoTemplate, token)) 
+			throw new ControlException("Token Invalide", "token");
 		try {
 			String requette = "SELECT * FROM STATOFFREJOURNALIER WHERE IDOFFRE='%s'";
 			requette = String.format(requette, getIdOffre());
@@ -116,7 +119,9 @@ public class Offre{
 		}
 	}
 	
-	public List<Statistiques> getStatistiqueMensuel(Connection connection) throws ControlException{
+	public List<Statistiques> getStatistiqueMensuel(Connection connection, MongoTemplate mongoTemplate, String token) throws ControlException{
+		if(!Token.estConnecteAdmin(mongoTemplate, token)) 
+			throw new ControlException("Token Invalide", "token");
 		try {
 			String requette = "SELECT * FROM STATOFFREMENSUEL WHERE IDOFFRE='%s'";
 			requette = String.format(requette, getIdOffre());
@@ -128,9 +133,11 @@ public class Offre{
 		}
 	}
 	
-	public static void findAll(Connection connection) throws SQLException, ValidateException{
+	public static void findAll(Connection connection, MongoTemplate mongoTemplate, String token) throws ControlException, SQLException, ValidateException{
+		if(!Token.estConnecteAdmin(mongoTemplate, token)) 
+			throw new ControlException("Token Invalide", "token");
 		try {
-			String requette = "SELECT * FROM OFFRE WHERE IDOFFRE!='DEFAUT'";
+			String requette = "SELECT * FROM OFFRE WHERE IDOFFRE!='DEFAUT' AND IDOFFRE!='MOBILEMONEY'";
 			List<Offre> ls = DatabaseHelper.find(connection, requette, Offre.class);
 			throw new ValidateException("ok", ls);
 		} catch (InstantiationException | IllegalAccessException e) {

@@ -5,6 +5,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import mg.ituproject.stm.models.Compte;
 import mg.ituproject.stm.models.Offre;
+import mg.ituproject.stm.models.Token;
 import mg.ituproject.stm.utils.databases.ConnectionHelper;
 import mg.ituproject.stm.utils.exceptions.ControlException;
 import mg.ituproject.stm.utils.exceptions.ValidateException;
@@ -24,8 +29,10 @@ import mg.ituproject.stm.utils.webServices.WebServiceObject;
 @RestController
 @RequestMapping("/offres")
 public class OffreController {
+	@Autowired
+	MongoTemplate mongoTemplate;
+	
 	@CrossOrigin(origins = "http://localhost:4200")
-	@PostMapping("/")
 	@ResponseBody
 	public WebServiceObject ajoutOffre(@RequestBody Offre offre){
 		Connection connection = null;
@@ -49,20 +56,22 @@ public class OffreController {
 	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@GetMapping(value = "/")
-	public WebServiceObject findAll()
+	public WebServiceObject findAll(HttpServletRequest request)
 	{
 		Compte compte = null;
 		Connection connection = null;
 		try {
-			ConnectionHelper.connectMongoDB();
+			String token = Token.extract(request);
 			connection = ConnectionHelper.getConnection();
-			Offre.findAll(connection);
+			Offre.findAll(connection, mongoTemplate, token);
 		}
 		catch(SQLException | ClassNotFoundException ex) {
 			return new WebServiceObject(500, ex.getMessage(), null);
 		}
 		catch(ValidateException ex) {
 			return new WebServiceObject(200, ex.getMessage(), ex.getData());
+		} catch (ControlException ex) {
+			return new WebServiceObject(100, ex.getMessage(), ex.getFieldName());
 		}
 		finally {
 			ConnectionHelper.closeConnection(connection);

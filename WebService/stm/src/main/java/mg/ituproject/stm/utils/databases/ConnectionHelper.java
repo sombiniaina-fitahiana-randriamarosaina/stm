@@ -14,10 +14,6 @@ import java.sql.SQLException;
  * @author sombiniaina
  */
 public class ConnectionHelper {
-	public static MongoHelper connectMongoDB() {
-		return new MongoHelper("localhost", 27017, "stm");
-	}
-	
     public static Connection getConnection() throws ClassNotFoundException, SQLException{
     	String user = "admin_stm";
 		String password = "123456";
