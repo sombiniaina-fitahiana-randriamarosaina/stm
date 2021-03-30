@@ -71,6 +71,7 @@ public class Data {
 			String requete=String.format("update data set data=data-%d where idOffre='%s'", (int)cout ,this.getIdOffre());
 			System.out.println(requete);
 			PreparedStatement stmt = null;
+			connection.setAutoCommit(false);
 			try {
 			
 	            stmt = connection.prepareStatement(requete);

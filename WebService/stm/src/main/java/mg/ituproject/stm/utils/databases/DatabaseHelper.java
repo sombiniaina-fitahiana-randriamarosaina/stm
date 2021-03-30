@@ -286,4 +286,10 @@ public class DatabaseHelper {
         }
         return result;
     }
+    
+    public static void update(Connection connection,String requete) throws SQLException{
+    	try(PreparedStatement stmt = connection.prepareStatement(requete)){
+    		stmt.execute();
+    	}
+    }
 }

@@ -2,6 +2,7 @@ package mg.ituproject.stm.models;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -86,8 +87,9 @@ public class Admin {
 			throw new ControlException("token invalide", "token");
 	}
 	
-	public static void validerDepot(Connection connection, Transaction transaction) throws ValidateException, ControlException, SQLException{
-		// avadika true le etat anle transaction
-		throw new ValidateException("Depot valider", null);
+	public static void validerDepot(Connection connection, MongoTemplate mongoTemplate,Transaction transaction, String token) throws Exception{
+		if(!Token.estConnecteAdmin(mongoTemplate, token)) 
+			throw new ControlException("Vous n'etes pas connecter", "token");
+		transaction.validation(connection);
 	}
 }

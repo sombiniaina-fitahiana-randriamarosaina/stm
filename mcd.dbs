@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project name="STM" id="Project_1eca" database="PostgreSQL" >
 	<schema name="stm" >
+		<table name="achatoffre" >
+			<column name="idclient" type="integer" jt="4" />
+			<column name="idoffre" type="integer" jt="4" />
+			<column name="dateachat" type="date" jt="91" />
+			<fk name="fk_achatoffre_client_0" to_schema="stm" to_table="client" >
+				<fk_column name="idclient" pk="idclient" />
+			</fk>
+			<fk name="fk_achatoffre_offre" to_schema="stm" to_table="offre" >
+				<fk_column name="idoffre" pk="idoffre" />
+			</fk>
+		</table>
 		<table name="client" >
 			<column name="idclient" type="varchar" jt="12" mandatory="y" />
 			<column name="nomclient" prior="nom" type="varchar" jt="12" mandatory="y" />
@@ -54,16 +65,6 @@
 				<column name="idoffre" />
 			</index>
 		</table>
-		<table name="offreforfait" >
-			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
-			<column name="idforfait" type="varchar" jt="12" mandatory="y" />
-			<fk name="fk_offreforfait_offre" to_schema="stm" to_table="offre" >
-				<fk_column name="idoffre" pk="idoffre" />
-			</fk>
-			<fk name="fk_offreforfait_forfait" to_schema="stm" to_table="forfait" >
-				<fk_column name="idforfait" pk="idforfait" />
-			</fk>
-		</table>
 		<table name="prixoffre" >
 			<comment><![CDATA[postgresql]]></comment>
 			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
@@ -78,7 +79,6 @@
 				<fk_column name="idforfait" pk="idforfait" />
 			</fk>
 		</table>
-		<table name="tbl" />
 		<table name="transaction" >
 			<column name="idtransaction" type="varchar" jt="12" mandatory="y" />
 			<column name="idclient" type="varchar" jt="12" mandatory="y" />
@@ -98,12 +98,13 @@ R : Refuser]]></comment>
 		</table>
 	</schema>
 	<layout name="postgresql" id="Layout_26c4" confirmed="y" show_relation="columns" >
-		<entity schema="stm" name="client" color="C1D8EE" x="240" y="48" />
-		<entity schema="stm" name="data" color="C1D8EE" x="496" y="192" />
-		<entity schema="stm" name="forfait" color="C1D8EE" x="256" y="352" />
-		<entity schema="stm" name="horaire" color="3986C1" x="816" y="160" />
-		<entity schema="stm" name="offre" color="C1D8EE" x="752" y="336" />
-		<entity schema="stm" name="prixoffre" color="C1D8EE" x="512" y="448" />
-		<entity schema="stm" name="transaction" color="C1D8EE" x="48" y="208" />
+		<entity schema="stm" name="achatoffre" color="C1D8EE" x="1152" y="48" />
+		<entity schema="stm" name="client" color="C1D8EE" x="240" y="96" />
+		<entity schema="stm" name="data" color="C1D8EE" x="496" y="240" />
+		<entity schema="stm" name="forfait" color="C1D8EE" x="256" y="400" />
+		<entity schema="stm" name="horaire" color="3986C1" x="816" y="208" />
+		<entity schema="stm" name="offre" color="C1D8EE" x="752" y="384" />
+		<entity schema="stm" name="prixoffre" color="C1D8EE" x="512" y="496" />
+		<entity schema="stm" name="transaction" color="C1D8EE" x="48" y="256" />
 	</layout>
 </project>

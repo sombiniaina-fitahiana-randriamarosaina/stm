@@ -38,8 +38,7 @@ public class ClientController {
 
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/inscription")
-	public WebServiceObject connectinscriptionion(@RequestBody Client client)
-	{
+	public WebServiceObject connectinscriptionion(@RequestBody Client client){
 		Connection connection = null;
 		try {
 			connection = ConnectionHelper.getConnection();
@@ -97,12 +96,63 @@ public class ClientController {
 			return new WebServiceObject(100, ex.getMessage(), map);
 		}
 	}
+	
+	@CrossOrigin(origins = "http://localhost:4200")
+	@GetMapping(value = "/comptes/{idClient}")
+	public WebServiceObject getCompte(@PathVariable("idClient") String idClient, HttpServletRequest request){
+		Connection connection = null;
+		try {
+			connection = ConnectionHelper.getConnection();
+			String token = Token.extract(request);
+			Client client = new Client(idClient, new Token(idClient, token));
+			client.getCompte(connection, mongoTemplate);
+		}
+		catch(ControlException ex) {
+			Map<String, String> map = new HashMap<>();
+			map.put("champs", ex.getFieldName());
+			return new WebServiceObject(100, ex.getMessage(), map);
+		}
+		catch(SQLException | ClassNotFoundException ex) {
+			return new WebServiceObject(500, ex.getMessage(), null);
+		}
+		catch(ValidateException ex) {
+			return new WebServiceObject(200, ex.getMessage(), ex.getData());
 
+		}
+		finally {
+			ConnectionHelper.closeConnection(connection);
+		}
+		return null;
+	}
+
+	@CrossOrigin(origins = "http://localhost:4200")
+	@PostMapping("/appeler")
+	@ResponseBody
+	public WebServiceObject appeller(@RequestBody Appel appel) throws InstantiationException, IllegalAccessException{
+		Connection connection = null;
+		try {
+			connection = ConnectionHelper.getConnection();
+			Client client = new Client(appel.getIdClient());
+			client.appeller(connection, mongoTemplate, appel);
+			return new WebServiceObject(200, "Appel effectue", null);
+		}
+		catch(ControlException ex) {
+			Map<String, String> map = new HashMap<>();
+			map.put("champs", ex.getFieldName());
+			return new WebServiceObject(100, ex.getMessage(), map);
+		}
+		catch(SQLException | ClassNotFoundException ex) {
+			return new WebServiceObject(500, ex.getMessage(), null);
+		}
+		finally {
+			ConnectionHelper.closeConnection(connection);
+		}
+	}
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/message")
 	@ResponseBody
-	public WebServiceObject messenger(@RequestBody Message message) throws InstantiationException, IllegalAccessException
-	{
+	public WebServiceObject messenger(@RequestBody Message message) throws InstantiationException, IllegalAccessException{
 
 		Connection connection = null;
 		try {
@@ -126,40 +176,11 @@ public class ClientController {
 		}
 		return null;
 	}
-	@CrossOrigin(origins = "http://localhost:4200")
-	@PostMapping("/appeler")
-	@ResponseBody
-	public WebServiceObject appeller(@RequestBody Appel appel) throws InstantiationException, IllegalAccessException
-	{
-
-		Connection connection = null;
-		try {
-			connection = ConnectionHelper.getConnection();
-			Client client = new Client(appel.getIdClient());
-			client.appeller(connection, mongoTemplate, appel);
-		}
-		catch(ControlException ex) {
-			Map<String, String> map = new HashMap<>();
-			map.put("champs", ex.getFieldName());
-			return new WebServiceObject(100, ex.getMessage(), map);
-		}
-		catch(SQLException | ClassNotFoundException ex) {
-			return new WebServiceObject(500, ex.getMessage(), null);
-		}
-		catch(ValidateException ex) {
-			return new WebServiceObject(200, ex.getMessage(), ex.getData());
-		}
-		finally {
-			ConnectionHelper.closeConnection(connection);
-		}
-		return null;
-	}
+	
 	@CrossOrigin(origins = "http://localhost:4200")
 	@PostMapping("/internet")
 	@ResponseBody
-	public WebServiceObject connecter(@RequestBody Connexion connexion) throws InstantiationException, IllegalAccessException
-	{
-
+	public WebServiceObject connecter(@RequestBody Connexion connexion) throws InstantiationException, IllegalAccessException{
 		Connection connection = null;
 		try {
 			connection = ConnectionHelper.getConnection();
@@ -176,36 +197,6 @@ public class ClientController {
 		}
 		catch(ValidateException ex) {
 			return new WebServiceObject(200, ex.getMessage(), ex.getData());
-		}
-		finally {
-			ConnectionHelper.closeConnection(connection);
-		}
-		return null;
-	}
-
-	@CrossOrigin(origins = "http://localhost:4200")
-	@GetMapping(value = "/comptes/{idClient}")
-	public WebServiceObject getCompte(@PathVariable("idClient") String idClient){
-		String user = "admin";
-		Compte compte = null;
-		Connection connection = null;
-		try {
-			connection = ConnectionHelper.getConnection();
-			// mila maka token
-			Client client = new Client(idClient);
-			client.getCompte(connection);
-		}
-		catch(ControlException ex) {
-			Map<String, String> map = new HashMap<>();
-			map.put("champs", ex.getFieldName());
-			return new WebServiceObject(100, ex.getMessage(), map);
-		}
-		catch(SQLException | ClassNotFoundException ex) {
-			return new WebServiceObject(500, ex.getMessage(), null);
-		}
-		catch(ValidateException ex) {
-			return new WebServiceObject(200, ex.getMessage(), ex.getData());
-
 		}
 		finally {
 			ConnectionHelper.closeConnection(connection);

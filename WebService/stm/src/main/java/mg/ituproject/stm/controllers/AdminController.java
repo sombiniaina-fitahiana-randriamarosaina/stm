@@ -54,4 +54,6 @@ public class AdminController {
 			return new WebServiceObject(100, ex.getMessage(), map);
 		}
 	}
+	
+	
 }

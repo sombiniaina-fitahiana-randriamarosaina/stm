@@ -20,6 +20,7 @@ public class Message {
 	protected String idClient;
 	protected String numero;
 	protected Timestamp dateMessage;
+	protected Integer type;
 	public String getIdMessage() {
 		return idMessage;
 	}
@@ -52,6 +53,12 @@ public class Message {
 	public Integer getIdForfait() {
 		return this.idForfait;
 	}
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
 	public Message(String idMessage, String idClient, String numero, Timestamp dateMessage) {
 		super();
 		this.idMessage = idMessage;
@@ -63,8 +70,17 @@ public class Message {
 		super();
 	}
 	public int tarifAUtiliser() {
-		//verifier par numero
-		return 0;
+		int n = 0;
+		if(this.getType()==0) {
+			n=0;
+		}
+		if(this.getType()<0) {
+			return 1;
+		}
+		if(this.getType()>0) {
+			return 2;
+		}
+		return n;
 	}
 	public double calculCout(Data data) throws ArrayIndexOutOfBoundsException, IllegalArgumentException, SQLException {
 		return ((BigDecimal)Array.get(data.getCout().getArray(),tarifAUtiliser())).doubleValue();

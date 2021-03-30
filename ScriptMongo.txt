@@ -13,6 +13,7 @@ db.createCollection("Admin");
 db.createCollection("AchatOffre");
 db.createCollection("TokenAdmin");
 db.createCollection("TokenClient");
+db.createCollection("Appel");
 
 
 

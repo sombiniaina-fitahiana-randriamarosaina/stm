@@ -52,8 +52,8 @@ public class Connexion {
 		super();
 	}
 	public int tarifAUtiliser() {
-		//verifier par numero
-		return 1;
+	
+		return 0;
 	}
 	
 	public Connexion(String idConnexion, String idClient, Integer volume, Timestamp date, Integer idForfait) {
@@ -89,7 +89,7 @@ public void control(Connection connection,Data data)throws ControlException,Vali
 		{
 			List<Connexion>connexion =new ArrayList<Connexion>();
 			connexion.add(this);
-			DatabaseHelper.insert(connection,connexion,Database.POSTGRESQL);
+			//DatabaseHelper.insert(connection,connexion,Database.POSTGRESQL);
 			
 		}
 		catch(Exception e) 

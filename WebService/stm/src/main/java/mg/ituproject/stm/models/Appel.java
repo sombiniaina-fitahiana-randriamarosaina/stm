@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -23,9 +24,9 @@ public class Appel {
 	protected String idClient;
 	protected String numero;
 	protected Integer duree;
-	protected Timestamp dateAppel;
+	protected Date dateAppel;
 	protected Integer type;
-	protected Integer idForfait;
+	protected Integer idForfait = 2;
 	
 	
 	// Getters & Setters
@@ -53,10 +54,10 @@ public class Appel {
 	public void setDuree(Integer duree) {
 		this.duree = duree;
 	}
-	public Timestamp getDateAppel() {
+	public Date getDateAppel() {
 		return dateAppel;
 	}
-	public void setDateAppel(Timestamp dateAppel) {
+	public void setDateAppel(Date dateAppel) {
 		this.dateAppel = dateAppel;
 	}
 	public Integer getType() {
@@ -84,18 +85,20 @@ public class Appel {
 		}
 		return n;
 	}
+	
 	public double calculCout(Data data) throws ArrayIndexOutOfBoundsException, IllegalArgumentException, SQLException {
 		System.out.println("fafafafafa"+tarifAUtiliser());
 		return this.getDuree()* ((BigDecimal)Array.get(data.getCout().getArray(),tarifAUtiliser())).doubleValue();
 	} 
+	
 	public double tempMax(Data data) throws ArrayIndexOutOfBoundsException, IllegalArgumentException, SQLException {
 		
 		return data.getData().doubleValue()/((BigDecimal)Array.get(data.getCout().getArray(),tarifAUtiliser())).doubleValue();
 	
 	}
+	
 	public ArrayList<Data> getAllData(Connection connection) throws InstantiationException, IllegalAccessException, SQLException{
 		String requete=String.format("select data.*,prixoffre.cout from data  join prixoffre on (data.idoffre=prixoffre.idoffre and data.idforfait=prixoffre.idforfait) where idClient='%s' and (dateexpiration>now() or data.idoffre='DEFAUT') and data.idforfait=%d and data>0 ",this.getIdClient(),this.getIdForfait());
-		System.out.println(requete);
 	    PreparedStatement stmt = null;
 	    ResultSet rs = null;
 	    ArrayList<Data> listData=new ArrayList<Data>();
@@ -108,6 +111,7 @@ public class Appel {
             	listData.add(new Data(rs.getString("idClient"),rs.getString("idOffre"),rs.getInt("idForfait"),rs.getBigDecimal("data"),rs.getTimestamp("dateExpiration"),rs.getArray("cout")));
             }
 	    }
+	    
         catch(Exception e){
              throw e;
         }
@@ -115,6 +119,7 @@ public class Appel {
 	    stmt.close(); 
 		return listData;
 	}
+	
     public void control(Connection connection,Data data)throws ControlException,ValidateException, ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException{
 		
 		if(this.getDuree()<0){
@@ -128,9 +133,9 @@ public class Appel {
 		}
 		throw new ValidateException("ok",null);	
 	}
-	public void insert(MongoTemplate mongoTemplate) 
-	{
-		//insert into monogoDB
+    
+	public void insert(MongoTemplate mongoTemplate) {
+		mongoTemplate.insert(this, "Appel");
 	}
 	
 }

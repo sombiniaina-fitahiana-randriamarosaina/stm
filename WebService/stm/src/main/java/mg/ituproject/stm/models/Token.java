@@ -90,6 +90,15 @@ public class Token{
 		return (token != null);
 	}
 	
+	public static boolean estConnecteCompteClient(MongoTemplate mongoTemplate, String idClient, String stringToken) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("token").is(stringToken)
+				.andOperator(Criteria.where("idPersonne").is(idClient))
+		);
+		Token token = mongoTemplate.findOne(query, Token.class, "TokenClient");
+		return (token != null);
+	}
+	
 	public static boolean estConnecteClient(MongoTemplate mongoTemplate, String stringToken) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("token").is(stringToken));

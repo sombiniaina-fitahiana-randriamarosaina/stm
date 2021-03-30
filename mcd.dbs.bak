@@ -97,7 +97,7 @@ R : Refuser]]></comment>
 			</fk>
 		</table>
 	</schema>
-	<layout name="postgresql" id="Layout_26c4" show_relation="columns" >
+	<layout name="postgresql" id="Layout_26c4" confirmed="y" show_relation="columns" >
 		<entity schema="stm" name="client" color="C1D8EE" x="240" y="48" />
 		<entity schema="stm" name="data" color="C1D8EE" x="496" y="192" />
 		<entity schema="stm" name="forfait" color="C1D8EE" x="256" y="352" />

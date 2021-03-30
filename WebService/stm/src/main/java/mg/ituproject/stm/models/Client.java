@@ -37,6 +37,10 @@ public class Client {
 	public Client(Token token) {
 		this.token = token;
 	}
+	public Client(String idClient, Token token) {
+		this.setIdClient(idClient);
+		this.token = token;
+	}
 
 	// Getters
 	public String getIdClient() {
@@ -78,7 +82,7 @@ public class Client {
 	public String getMotDePasse() {
 		return DigestUtils.sha1Hex(motDePasse);
 	}
-
+	
 	public void inscription (Connection connection) throws ControlException, SQLException{
 		List<Client> lc = new ArrayList<>();
 		lc.add(this);
@@ -122,7 +126,9 @@ public class Client {
 			throw new ControlException("token invalide", "token");
 	}
 
-	public void getCompte(Connection connection) throws ControlException, ValidateException, SQLException{
+	public void getCompte(Connection connection, MongoTemplate mongoTemplate) throws ControlException, ValidateException, SQLException{
+		if(!Token.estConnecteCompteClient(mongoTemplate, this.getIdClient(),this.token.getToken()))
+			throw new ControlException("Vous n'etes pas connecter a ce compte", "token");
 		try {
 			String requete = String.format("select * from Compte where idClient='%s'", getIdClient());
             List<Compte> lc = DatabaseHelper.find(connection, requete, Compte.class);
@@ -134,6 +140,16 @@ public class Client {
 			e.printStackTrace();
 		}
 	}
+	
+	public List<Appel> getHistoriqueAppels(MongoTemplate mongoTemplate) throws ControlException {
+		if(!Token.estConnecteCompteClient(mongoTemplate, this.getIdClient(),this.token.getToken()))
+			throw new ControlException("Vous n'etes pas connecter a ce compte", "token");
+		
+		Query query = new Query();
+		query.addCriteria(Criteria.where("idClient").is(this.getIdClient()));
+		return mongoTemplate.find(query, Appel.class, "Appel");
+	}
+	
 	public void Message(Connection connection, MongoTemplate mongoTemplate,Message message) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
 		ArrayList<Data> listeData=message.getAllData(connection);
 		int i=0;
@@ -150,7 +166,7 @@ public class Client {
 
 //				message.insert(mongoTemplate);
 				listeData.get(i).UpdateData(connection,message.calculCout(listeData.get(i)));
-				throw new ValidateException("appel effectue", null);
+				throw new ValidateException("message envoyer", null);
 			}
 	}
 	public void connecter(Connection connection, MongoTemplate mongoTemplate,Connexion connexion) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
@@ -167,7 +183,7 @@ public class Client {
 				throw new ControlException("Connexion non effectuee ", e.getMessage());
 			}
 			else {
-				connexion.insert(connection);
+				//connexion.insert(connection);
 				listeData.get(i).UpdateData(connection,connexion.calculCout(listeData.get(i)));
 				throw new ValidateException("connexion effectuee...", null);
 			}
@@ -186,28 +202,27 @@ public class Client {
 				}
 			}
 			else {
-				connexion.insert(connection);
+				//connexion.insert(connection);
 				listeData.get(i).UpdateData(connection,connexion.calculCout(listeData.get(i)));
-				throw new ValidateException("appel effectue", null);
+				throw new ValidateException("connexion effectue", null);
 			}
 		}
 	}
-	public void appeller(Connection connection, MongoTemplate mongoTemplate,Appel appel) throws InstantiationException, IllegalAccessException, SQLException, ControlException,ValidateException, ClassNotFoundException{
-		ArrayList<Data> listeData=appel.getAllData(connection);
+	
+	public void appeller(Connection connection, MongoTemplate mongoTemplate,Appel appel) throws InstantiationException, IllegalAccessException, SQLException, ControlException, ClassNotFoundException{
+		ArrayList<Data> listeData = appel.getAllData(connection);
+		if(listeData.size()==0)
+			throw new ControlException("votre credit est insufisant","");		
 		int i=0;
 		try{
-			if(listeData.size()==0) {
-				throw new ControlException("votre credit est insufisant","");
-			}
 			appel.control(connection, listeData.get(i));
 		}
 		catch(ControlException e) {
-
-				throw new ControlException("appell non effectuee ", e.getMessage());
+			throw new ControlException("appell non effectuee ", e.getMessage());
 		}
 		catch(ValidateException e) {
 			if(e.getMessage().equals("Votre offre est epuisee")) {
-				//appel.insert(mongoHelper);
+				appel.insert(mongoTemplate);
 				listeData.get(i).UpdateData(connection,appel.calculCout(listeData.get(i)));
 				i++;
 				if(i<listeData.size()){
@@ -219,9 +234,8 @@ public class Client {
 				}
 			}
 			else {
-//				appel.insert(connection);
+				appel.insert(mongoTemplate);
 				listeData.get(i).UpdateData(connection,appel.calculCout(listeData.get(i)));
-				throw new ValidateException("appel effectue", null);
 			}
 		}
 	}

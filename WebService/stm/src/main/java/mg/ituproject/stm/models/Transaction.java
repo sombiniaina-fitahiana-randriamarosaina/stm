@@ -45,7 +45,7 @@ public class Transaction {
 	public void setDateTransaction(Timestamp dateTransaction) {
 		this.dateTransaction = dateTransaction;
 	}
-	public boolean isEtat() {
+	public boolean getEtat() {
 		return etat;
 	}
 	public void setEtat(boolean etat) {
@@ -63,5 +63,10 @@ public class Transaction {
 			e.printStackTrace();
 		}
 		return lc;
+	}
+	
+	public void validation(Connection connection) throws SQLException {
+		String requete=String.format("update transaction set etat=true where idtransaction='%s' ",this.getIdTransaction());
+		DatabaseHelper.update(connection,requete);
 	}
 }
