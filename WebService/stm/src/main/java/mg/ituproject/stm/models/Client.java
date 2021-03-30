@@ -117,7 +117,7 @@ public class Client {
 
 		Query query = new Query();
 		query.addCriteria(Criteria.where("token").is(this.token.getToken()));
-		DeleteResult result = mongoTemplate.remove(query, "Token");
+		DeleteResult result = mongoTemplate.remove(query, "TokenClient");
 		if(result.getDeletedCount() == 0)
 			throw new ControlException("token invalide", "token");
 	}
@@ -134,7 +134,7 @@ public class Client {
 			e.printStackTrace();
 		}
 	}
-	public void Message(Connection connection,MongoHelper mongoHelper,Message message) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
+	public void Message(Connection connection, MongoTemplate mongoTemplate,Message message) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
 		ArrayList<Data> listeData=message.getAllData(connection);
 		int i=0;
 		try{
@@ -148,12 +148,12 @@ public class Client {
 		}
 		catch(ValidateException e) {
 
-				message.insert(mongoHelper);
+//				message.insert(mongoTemplate);
 				listeData.get(i).UpdateData(connection,message.calculCout(listeData.get(i)));
 				throw new ValidateException("appel effectue", null);
 			}
 	}
-	public void connecter(Connection connection,MongoHelper mongoHelper,Connexion connexion) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
+	public void connecter(Connection connection, MongoTemplate mongoTemplate,Connexion connexion) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
 		ArrayList<Data> listeData= connexion.getAllData(connection);
 		int i=0;
 		try{
@@ -179,7 +179,7 @@ public class Client {
 				i++;
 				if(i<listeData.size()){
 					connexion.setVolume(((Double)e.getData()).intValue());
-					this.connecter(connection, connexion);
+//					this.connecter(connection, connexion);
 				}
 				else {
 					return;
@@ -192,7 +192,7 @@ public class Client {
 			}
 		}
 	}
-	public void appeller(Connection connection, MongoHelper mongoHelper,Appel appel) throws InstantiationException, IllegalAccessException, SQLException, ControlException,ValidateException, ClassNotFoundException{
+	public void appeller(Connection connection, MongoTemplate mongoTemplate,Appel appel) throws InstantiationException, IllegalAccessException, SQLException, ControlException,ValidateException, ClassNotFoundException{
 		ArrayList<Data> listeData=appel.getAllData(connection);
 		int i=0;
 		try{
@@ -212,22 +212,17 @@ public class Client {
 				i++;
 				if(i<listeData.size()){
 					appel.setDuree(((Double)e.getData()).intValue());
-					this.appeller(connection, appel);
+					this.appeller(connection, mongoTemplate, appel);
 				}
 				else {
 					throw new ControlException("Votre offre est epuisee","");
 				}
 			}
 			else {
-				appel.insert(connection);
+//				appel.insert(connection);
 				listeData.get(i).UpdateData(connection,appel.calculCout(listeData.get(i)));
 				throw new ValidateException("appel effectue", null);
 			}
 		}
 	}
-
-
-
-
-
 }

@@ -10,6 +10,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
+
 import mg.ituproject.stm.utils.databases.Database;
 import mg.ituproject.stm.utils.databases.DatabaseHelper;
 import mg.ituproject.stm.utils.exceptions.ControlException;
@@ -126,7 +128,7 @@ public class Appel {
 		}
 		throw new ValidateException("ok",null);	
 	}
-	public void insert(MongoHelper mongoHelper) 
+	public void insert(MongoTemplate mongoTemplate) 
 	{
 		//insert into monogoDB
 	}

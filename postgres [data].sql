@@ -10,8 +10,8 @@ VALUES ('DEFAUT', 1);
 
 INSERT INTO PRIXOFFRE (IDOFFRE, IDFORFAIT, PRIX, VALIDITE, COUT) 
 VALUES 
-        ('DEFAUT', 1, 0, NULL, '{1.0, 3.0, 6.0}'),
-        ('DEFAUT', 2, 0, NULL, '{100.0, 120.0, 200.0}'),
-        ('DEFAUT', 3, 0, NULL, '{0.5}');
+        ('DEFAUT', 2, 0, NULL, '{1.0, 3.0, 6.0}'),
+        ('DEFAUT', 3, 0, NULL, '{100.0, 120.0, 200.0}'),
+        ('DEFAUT', 4, 0, NULL, '{0.5}');
 
 

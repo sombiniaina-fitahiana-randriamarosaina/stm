@@ -81,7 +81,7 @@ public class Admin {
 		
 		Query query = new Query();
 		query.addCriteria(Criteria.where("token").is(this.token.getToken()));
-		DeleteResult result = mongoTemplate.remove(query, "Token");
+		DeleteResult result = mongoTemplate.remove(query, "TokenAdmin");
 		if(result.getDeletedCount() == 0)
 			throw new ControlException("token invalide", "token");
 	}

@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import mg.ituproject.stm.models.Admin;
+import mg.ituproject.stm.models.Appel;
 import mg.ituproject.stm.models.Client;
 import mg.ituproject.stm.models.Compte;
 import mg.ituproject.stm.models.Token;
@@ -106,7 +108,7 @@ public class ClientController {
 		try {
 			connection = ConnectionHelper.getConnection();
 			Client client = new Client(message.getIdClient());
-			client.Message(connection, message);
+			client.Message(connection, mongoTemplate, message);
 		}
 		catch(ControlException ex) {
 			Map<String, String> map = new HashMap<>();
@@ -134,7 +136,7 @@ public class ClientController {
 		try {
 			connection = ConnectionHelper.getConnection();
 			Client client = new Client(appel.getIdClient());
-			client.appeller(connection, appel);
+			client.appeller(connection, mongoTemplate, appel);
 		}
 		catch(ControlException ex) {
 			Map<String, String> map = new HashMap<>();
@@ -162,7 +164,7 @@ public class ClientController {
 		try {
 			connection = ConnectionHelper.getConnection();
 			Client client = new Client(connexion.getIdClient());
-			client.connecter(connection, connexion);
+			client.connecter(connection, mongoTemplate, connexion);
 		}
 		catch(ControlException ex) {
 			Map<String, String> map = new HashMap<>();
