@@ -80,6 +80,8 @@
 			<column name="idsousforfait" type="integer" jt="4" mandatory="y" />
 			<column name="idforfait" type="integer" jt="4" />
 			<column name="nomsousforfait" type="integer" jt="4" />
+			<column name="coucredit" type="varchar" jt="12" />
+			<column name="coutoffre" type="varchar" jt="12" />
 			<index name="pk_sousforfait_idsousforfait" unique="PRIMARY_KEY" >
 				<column name="idsousforfait" />
 			</index>
@@ -130,15 +132,14 @@ R : Refuser]]></comment>
 		</table>
 	</schema>
 	<layout name="postgresql" id="Layout_26c4" confirmed="y" show_relation="columns" >
-		<entity schema="stm" name="achatoffre" color="C1DEEE" x="288" y="176" />
-		<entity schema="stm" name="client" color="C1DEEE" x="64" y="352" />
-		<entity schema="stm" name="coutsousoffre" color="C1D8EE" x="1104" y="112" />
-		<entity schema="stm" name="data" color="C1DEEE" x="496" y="304" />
-		<entity schema="stm" name="forfait" color="C1DEEE" x="768" y="496" />
-		<entity schema="stm" name="offre" color="C1DEEE" x="416" y="48" />
-		<entity schema="stm" name="sousforfait" color="C1D8EE" x="1264" y="480" />
-		<entity schema="stm" name="sousoffre" color="C1DEEE" x="848" y="48" />
-		<entity schema="stm" name="transaction" color="C1DEEE" x="48" y="128" />
-		<entity schema="stm" name="volumesousoffre" color="C1DEEE" x="928" y="320" />
+		<entity schema="stm" name="achatoffre" color="C1DEEE" x="288" y="96" />
+		<entity schema="stm" name="client" color="C1DEEE" x="64" y="272" />
+		<entity schema="stm" name="data" color="C1DEEE" x="544" y="336" />
+		<entity schema="stm" name="forfait" color="C1DEEE" x="800" y="352" />
+		<entity schema="stm" name="offre" color="C1DEEE" x="496" y="80" />
+		<entity schema="stm" name="sousforfait" color="C1D8EE" x="960" y="544" />
+		<entity schema="stm" name="sousoffre" color="C1DEEE" x="560" y="176" />
+		<entity schema="stm" name="transaction" color="C1DEEE" x="48" y="48" />
+		<entity schema="stm" name="volumesousoffre" color="C1DEEE" x="800" y="192" />
 	</layout>
 </project>

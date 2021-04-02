@@ -45,19 +45,19 @@
 			</fk>
 		</table>
 		<table name="data" prior="achatoffre" >
-			<column name="idoffre" type="varchar" jt="12" mandatory="y" />
+			<column name="idsousoffre" prior="idoffre" type="varchar" jt="12" mandatory="y" />
 			<column name="idclient" type="varchar" jt="12" mandatory="y" />
 			<column name="idforfait" type="varchar" jt="12" mandatory="y" />
 			<column name="data" prior="montant" type="decimal" length="14" decimal="2" jt="3" mandatory="y" />
 			<column name="dateexpiration" type="timestamp" jt="93" mandatory="y" />
-			<fk name="fk_achatoffre_offre" to_schema="stm" to_table="offre" >
-				<fk_column name="idoffre" pk="idoffre" />
-			</fk>
 			<fk name="fk_achatoffre_client" to_schema="stm" to_table="client" >
 				<fk_column name="idclient" pk="idclient" />
 			</fk>
 			<fk name="fk_achatoffre_forfait" to_schema="stm" to_table="forfait" >
 				<fk_column name="idforfait" pk="idforfait" />
+			</fk>
+			<fk name="fk_data_sousoffre" to_schema="stm" to_table="sousoffre" options="" >
+				<fk_column name="idsousoffre" pk="idsousoffre" />
 			</fk>
 		</table>
 		<table name="forfait" >
@@ -130,15 +130,15 @@ R : Refuser]]></comment>
 		</table>
 	</schema>
 	<layout name="postgresql" id="Layout_26c4" confirmed="y" show_relation="columns" >
-		<entity schema="stm" name="achatoffre" color="C1DEEE" x="320" y="192" />
+		<entity schema="stm" name="achatoffre" color="C1DEEE" x="288" y="176" />
 		<entity schema="stm" name="client" color="C1DEEE" x="64" y="352" />
 		<entity schema="stm" name="coutsousoffre" color="C1D8EE" x="1104" y="112" />
-		<entity schema="stm" name="data" color="C1DEEE" x="288" y="432" />
-		<entity schema="stm" name="forfait" color="C1DEEE" x="672" y="448" />
-		<entity schema="stm" name="offre" color="C1DEEE" x="576" y="272" />
-		<entity schema="stm" name="sousforfait" color="C1D8EE" x="1136" y="400" />
+		<entity schema="stm" name="data" color="C1DEEE" x="496" y="304" />
+		<entity schema="stm" name="forfait" color="C1DEEE" x="768" y="496" />
+		<entity schema="stm" name="offre" color="C1DEEE" x="416" y="48" />
+		<entity schema="stm" name="sousforfait" color="C1D8EE" x="1264" y="480" />
 		<entity schema="stm" name="sousoffre" color="C1DEEE" x="848" y="48" />
 		<entity schema="stm" name="transaction" color="C1DEEE" x="48" y="128" />
-		<entity schema="stm" name="volumesousoffre" color="C1DEEE" x="912" y="288" />
+		<entity schema="stm" name="volumesousoffre" color="C1DEEE" x="928" y="320" />
 	</layout>
 </project>
