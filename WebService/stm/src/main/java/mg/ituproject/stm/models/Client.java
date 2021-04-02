@@ -1,11 +1,14 @@
 package mg.ituproject.stm.models;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -14,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import com.mongodb.client.result.DeleteResult;
 
+import mg.ituproject.stm.utils.DateHelpers;
 import mg.ituproject.stm.utils.databases.Database;
 import mg.ituproject.stm.utils.databases.DatabaseHelper;
 import mg.ituproject.stm.utils.exceptions.ControlException;
@@ -89,6 +93,44 @@ public class Client {
 		DatabaseHelper.insert(connection, lc, Database.POSTGRESQL);
 	}
 
+	public List<Data> generateDataOf(List<SousOffreComplet> listsousoffre){
+		List<Data> datas = new ArrayList<>();
+		String idClient = this.getIdClient();
+		for (SousOffreComplet sousOffreComplet : listsousoffre) {
+			String idSousOffre = sousOffreComplet.getIdSousOffre();
+			String idForfait = sousOffreComplet.getIdForfait();
+			BigDecimal data = new BigDecimal(sousOffreComplet.getVolume());
+			Timestamp dateExpiration = null;
+			if(sousOffreComplet.getValidite() == 0)
+				dateExpiration = DateHelpers.getFinJournee();
+			else
+				dateExpiration = new Timestamp(DateHelpers.addDays(new Date() , sousOffreComplet.getValidite()).getTime());
+			datas.add(new Data(idSousOffre, idClient, idForfait, data, dateExpiration));
+		}
+		return datas;
+	}
+	
+	public void updateData(Connection connection, List<SousOffreComplet> listsousoffre,  List<Data> datas) throws SQLException{
+		Map<String, SousOffreComplet> map = SousOffreComplet.maperSousOffreComplet(listsousoffre);
+		try(PreparedStatement pstmt = connection.prepareStatement("UPDATE DATA SET DATA=?, DATEEXPIRATION=? WHERE IDCLIENT=? AND IDSOUSOFFRE=?")){
+			connection.setAutoCommit(false);
+			for (Data data : datas) {
+				Timestamp exp = new Timestamp(DateHelpers.addDays(new Date() , map.get(data.getIdSousOffre()).getValidite()).getTime());
+				pstmt.setBigDecimal(1, data.getData().add(new BigDecimal(map.get(data.getIdSousOffre()).getVolume())));
+				pstmt.setTimestamp(2, exp);
+				pstmt.setString(3, this.getIdClient());
+				pstmt.setString(4, data.getIdSousOffre());
+				pstmt.addBatch();
+			}
+			pstmt.executeUpdate();
+			connection.commit();
+		}
+		catch(SQLException ex) {
+			connection.rollback();
+			throw ex.getNextException();
+		}
+	}
+	
 	public Token connexion(Connection connection, MongoTemplate mongoTemplate) throws ControlException, SQLException{
 		try {
 			String requete = String.format("select * from Client where nomClient='%s'", getNomClient());
@@ -150,93 +192,81 @@ public class Client {
 		return mongoTemplate.find(query, Appel.class, "Appel");
 	}
 	
-	public void Message(Connection connection, MongoTemplate mongoTemplate,Message message) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
-		ArrayList<Data> listeData=message.getAllData(connection);
-		int i=0;
-		try{
-			if(listeData.size()==0) {
-				throw new ControlException("votre offre sms est epuisee","");
-			}
-			message.control(connection, listeData.get(i));
+	public void AchatCredit(Connection connection, Double montant) throws SQLException {
+		try(PreparedStatement pstmt = connection.prepareStatement("UPDATE DATA SET DATA=? WHERE IDCLIENT=? AND IDSOUSOFFRE='DEFAUT'")){
+			connection.setAutoCommit(false);
+			pstmt.setBigDecimal(1, new BigDecimal(montant));
+			pstmt.setString(2, this.getIdClient());
+			pstmt.executeUpdate();
+			connection.commit();
 		}
-		catch(ControlException e) {
-			throw new ControlException("Message  non envoyee ", e.getMessage());
+		catch(SQLException ex) {
+			connection.rollback();
+			throw ex.getNextException();
 		}
-		catch(ValidateException e) {
-
-//				message.insert(mongoTemplate);
-				listeData.get(i).UpdateData(connection,message.calculCout(listeData.get(i)));
-				throw new ValidateException("message envoyer", null);
-			}
 	}
-	public void connecter(Connection connection, MongoTemplate mongoTemplate,Connexion connexion) throws ControlException, ClassNotFoundException, InstantiationException, IllegalAccessException, ValidateException, SQLException {
-		ArrayList<Data> listeData= connexion.getAllData(connection);
-		int i=0;
-		try{
-			if(listeData.size()==0) {
-				throw new ControlException("votre forfait internet est epuisee","");
+	
+	public void controlAchatOffre(Connection connection, Integer prix) throws InstantiationException, IllegalAccessException, SQLException, ControlException {
+//		VERIFIENA OE AMPY VE NY VOLANY
+		String selectVolako = "SELECT * FROM DATA WHERE IDCLIENT='%s' AND IDSOUSOFFRE='DEFAUT'";
+		selectVolako = String.format(selectVolako, this.getIdClient());
+		Data volako = DatabaseHelper.find(connection, selectVolako, Data.class).get(0);
+		if(volako.getData().doubleValue() < prix) 
+			throw new ControlException("Credit Insuffisant", null);
+		else {
+			try(PreparedStatement pstmt = connection.prepareStatement("UPDATE DATA SET DATA=? WHERE IDCLIENT=? AND IDSOUSOFFRE='DEFAUT'")){
+				connection.setAutoCommit(false);
+				pstmt.setBigDecimal(1, new BigDecimal(volako.getData().doubleValue() - prix));
+				pstmt.setString(2, this.getIdClient());
+				pstmt.executeUpdate();
+				connection.commit();
 			}
-			connexion.control(connection, listeData.get(i));
-		}
-		catch(ControlException e) {
-			if(e.getMessage().equals("volume invalide")) {
-				throw new ControlException("Connexion non effectuee ", e.getMessage());
-			}
-			else {
-				//connexion.insert(connection);
-				listeData.get(i).UpdateData(connection,connexion.calculCout(listeData.get(i)));
-				throw new ValidateException("connexion effectuee...", null);
-			}
-		}
-		catch(ValidateException e) {
-			if(e.getMessage().equals("Votre offre est epuisee")) {
-				connexion.insert(connection);
-				listeData.get(i).UpdateData(connection,connexion.calculCout(listeData.get(i)));
-				i++;
-				if(i<listeData.size()){
-					connexion.setVolume(((Double)e.getData()).intValue());
-//					this.connecter(connection, connexion);
-				}
-				else {
-					return;
-				}
-			}
-			else {
-				//connexion.insert(connection);
-				listeData.get(i).UpdateData(connection,connexion.calculCout(listeData.get(i)));
-				throw new ValidateException("connexion effectue", null);
+			catch(SQLException ex) {
+				connection.rollback();
+				throw ex.getNextException();
 			}
 		}
 	}
 	
-	public void appeller(Connection connection, MongoTemplate mongoTemplate,Appel appel) throws InstantiationException, IllegalAccessException, SQLException, ControlException, ClassNotFoundException{
-		ArrayList<Data> listeData = appel.getAllData(connection);
-		if(listeData.size()==0)
-			throw new ControlException("votre credit est insufisant","");		
-		int i=0;
-		try{
-			appel.control(connection, listeData.get(i));
+	public void achatOffre (MongoTemplate mongoTemplate, Connection connection, SousOffre sousOffre) throws ControlException, InstantiationException, IllegalAccessException, SQLException {
+		if(!Token.estConnecteCompteClient(mongoTemplate, this.getIdClient(),this.token.getToken()))
+			throw new ControlException("Vous n'etes pas connecter a ce compte", "token");
+		
+		String selectSousOffre = "SELECT * FROM SOUSOFFRE NATURAL JOIN VOLUMESOUSOFFRE WHERE IDSOUSOFFRE='%s'";
+		selectSousOffre = String.format(selectSousOffre, sousOffre.getIdSousOffre());
+		List<SousOffreComplet> listsousoffre = DatabaseHelper.find(connection, selectSousOffre, SousOffreComplet.class);
+		
+		if(listsousoffre.size() != 0) {
+			this.controlAchatOffre(connection, listsousoffre.get(0).getPrix());
+			List<AchatOffre> lachatO = new ArrayList<>();
+			lachatO.add( new AchatOffre(this.getIdClient(), listsousoffre.get(0).getIdOffre(),new Timestamp(new Date().getTime())));
+			DatabaseHelper.insert(connection, lachatO, Database.POSTGRESQL);
 		}
-		catch(ControlException e) {
-			throw new ControlException("appell non effectuee ", e.getMessage());
+		
+		String selectData = "SELECT * FROM DATA WHERE IDCLIENT='%s' AND IDSOUSOFFRE='%s'";
+		selectData = String.format(selectData, this.getIdClient(), sousOffre.getIdSousOffre());
+		List<Data> myDatas = DatabaseHelper.find(connection, selectData, Data.class);
+		
+		if(myDatas.size() == 0) 
+			DatabaseHelper.insert(connection, generateDataOf(listsousoffre), Database.POSTGRESQL);
+		else 
+			this.updateData(connection, listsousoffre, myDatas);
+		
+//		insert anaty achat offre
+	}
+	
+	public void consomer(MongoTemplate mongoTemplate, Connection connection, Consomation consomation) throws ControlException, InstantiationException, IllegalAccessException, SQLException {
+		if(!Token.estConnecteCompteClient(mongoTemplate, this.getIdClient(),this.token.getToken()))
+			throw new ControlException("Vous n'etes pas connecter a ce compte", "token");
+		String selectMyData = "SELECT * FROM (SELECT * FROM CONSOOFFRE UNION SELECT * FROM CONSOCREDIT) R WHERE IDCLIENT = '%s' AND IDSOUSFORFAIT='%s' ORDER BY DATEEXPIRATION";
+		selectMyData = String.format(selectMyData, this.getIdClient(), consomation.getIdSousForfait());
+		System.out.println(selectMyData);
+		List<DataConsomation> myData = DatabaseHelper.find(connection, selectMyData, DataConsomation.class);
+		for (DataConsomation dataConsomation : myData) { 
+			consomation = dataConsomation.consomer(connection, consomation);
+			if(consomation.getQuantite() == 0)
+				return;
 		}
-		catch(ValidateException e) {
-			if(e.getMessage().equals("Votre offre est epuisee")) {
-				appel.insert(mongoTemplate);
-				listeData.get(i).UpdateData(connection,appel.calculCout(listeData.get(i)));
-				i++;
-				if(i<listeData.size()){
-					appel.setDuree(((Double)e.getData()).intValue());
-					this.appeller(connection, mongoTemplate, appel);
-				}
-				else {
-					throw new ControlException("Votre offre est epuisee","");
-				}
-			}
-			else {
-				appel.insert(mongoTemplate);
-				listeData.get(i).UpdateData(connection,appel.calculCout(listeData.get(i)));
-			}
-		}
+		throw new ControlException("Offre et Credit epuise!", null);
 	}
 }

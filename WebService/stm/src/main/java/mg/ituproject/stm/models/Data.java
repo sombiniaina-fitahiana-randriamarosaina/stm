@@ -1,24 +1,41 @@
 package mg.ituproject.stm.models;
 
 import java.math.BigDecimal;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 
-import mg.ituproject.stm.utils.databases.DatabaseHelper;
+import mg.ituproject.stm.utils.DateHelpers;
+
 
 public class Data {
-	String idClient;
-	String idOffre;
-	int idForfait;
-	BigDecimal data;
-	Timestamp dateExpiration;
-	Array cout;
+	public Data(String idOffre, String idClient, String idForfait, BigDecimal data, Timestamp dateExpiration) {
+		super();
+		this.idSousOffre = idOffre;
+		this.idClient = idClient;
+		this.idForfait = idForfait;
+		this.data = data;
+		this.dateExpiration = dateExpiration;
+	}
 	
 	public Data() {
 		super();
+	}
+	// Fields
+	protected String idSousOffre;
+	protected String idClient;
+	protected String idForfait;
+	protected BigDecimal data;
+	protected Timestamp dateExpiration;
+	
+	// Setters & Getters
+	public String getIdSousOffre() {
+		return idSousOffre;
+	}
+	public void setIdSousOffre(String idOffre) {
+		this.idSousOffre = idOffre;
 	}
 	public String getIdClient() {
 		return idClient;
@@ -26,16 +43,10 @@ public class Data {
 	public void setIdClient(String idClient) {
 		this.idClient = idClient;
 	}
-	public String getIdOffre() {
-		return idOffre;
-	}
-	public void setIdOffre(String idOffre) {
-		this.idOffre = idOffre;
-	}
-	public int getIdForfait() {
+	public String getIdForfait() {
 		return idForfait;
 	}
-	public void setIdForfait(int idForfait) {
+	public void setIdForfait(String idForfait) {
 		this.idForfait = idForfait;
 	}
 	public BigDecimal getData() {
@@ -50,49 +61,4 @@ public class Data {
 	public void setDateExpiration(Timestamp dateExpiration) {
 		this.dateExpiration = dateExpiration;
 	}
-	public void setCout(Array cout) {
-		this.cout=cout;
-		}
-	public Array getCout() {
-		return this.cout;
-	}
-	public Data(String idClient, String idOffre, int idForfait, BigDecimal data, Timestamp dateExpiration,
-			Array cout) {
-		super();
-		this.idClient = idClient;
-		this.idOffre = idOffre;
-		this.idForfait = idForfait;
-		this.data = data;
-		this.dateExpiration = dateExpiration;
-		this.cout = cout;
-	}
-	public void UpdateData(Connection connection,double cout) throws SQLException {
-		
-			String requete=String.format("update data set data=data-%d where idOffre='%s'", (int)cout ,this.getIdOffre());
-			System.out.println(requete);
-			PreparedStatement stmt = null;
-			connection.setAutoCommit(false);
-			try {
-			
-	            stmt = connection.prepareStatement(requete);
-	            stmt.executeUpdate();
-	            connection.commit();
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
-			finally {
-				  
-	            stmt.close();
-			}
-			
-         
-    
-	}
-	
-	
-	
-	
-	
-	
 }
