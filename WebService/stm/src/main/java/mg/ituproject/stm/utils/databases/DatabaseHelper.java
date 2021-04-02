@@ -55,7 +55,7 @@ public class DatabaseHelper {
             try {
                 String columnName = metaData.getColumnName(i);
                 Field field = mapFields.get(columnName);
-                if (field == null) {
+                if (field == null || resultSet.getObject(i) == null) {
                     continue;
                 }
                 Object databaseValue = resultSet.getObject(i);
@@ -64,7 +64,7 @@ public class DatabaseHelper {
                 Method setters = object.getClass().getMethod("set" + Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1), field.getType());
                 setters.invoke(object, databaseValue);
             } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | ClassNotFoundException ex) {
-            	ex.printStackTrace();
+            	
             } 
         }
     }
@@ -152,33 +152,6 @@ public class DatabaseHelper {
         }
         return list;
     }
-    
-    /*public static List<Model> find(Connection connection, String request) throws SQLException {
-        List<Model> list = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        ResultSetMetaData metaData = null;
-        try{
-            stmt = connection.prepareStatement( request );
-            rs = stmt.executeQuery();
-            list = new ArrayList<>();
-            metaData = rs.getMetaData();
-            
-            while(rs.next()){
-                Model model = new Model();
-                for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    String columnName = metaData.getColumnName(i);
-                    model.set(columnName, rs.getObject(i));
-                }
-                list.add(model);
-            }
-        }
-        finally{
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
-        }
-        return list;
-    }*/
     
     public static <T> T findById(Connection connection, Class<T> type, String idFieldName, Object id) throws Exception{
         String table = type.getSimpleName().toUpperCase();
@@ -285,5 +258,11 @@ public class DatabaseHelper {
             if (stmt != null) stmt.close();
         }
         return result;
+    }
+    
+    public static void update(Connection connection,String requete) throws SQLException{
+    	try(PreparedStatement stmt = connection.prepareStatement(requete)){
+    		stmt.execute();
+    	}
     }
 }

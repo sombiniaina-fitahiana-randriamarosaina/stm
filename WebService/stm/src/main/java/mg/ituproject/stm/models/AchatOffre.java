@@ -3,6 +3,18 @@ package mg.ituproject.stm.models;
 import java.sql.Timestamp;
 
 public class AchatOffre {
+	
+	
+	public AchatOffre(String idClient, String idOffre, Timestamp dateAchat) {
+		super();
+		this.idClient = idClient;
+		this.idOffre = idOffre;
+		this.dateAchat = dateAchat;
+	}
+	
+	public AchatOffre() {
+		super();
+	}
 	// Fields
 	protected String idClient;
 	protected String idOffre;
